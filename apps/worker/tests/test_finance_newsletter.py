@@ -1,6 +1,7 @@
 """Tests for the weekly finance newsletter workflow with stubbed external effects."""
 
 import asyncio
+import base64
 from collections.abc import Awaitable, Callable
 from datetime import timedelta
 
@@ -12,6 +13,7 @@ from mistralai.client.models import (
     ResponseFormat,
 )
 from mistralai.workflows.testing import create_test_worker
+
 from worker.workflows.finance_newsletter import (
     NewsletterContent,
     Story,
@@ -41,7 +43,7 @@ CONTENT = NewsletterContent(
     plain_text="This is the plain text newsletter.",
 )
 
-FAKE_MP3 = b"ID3fakeaudio"
+FAKE_MP3 = base64.b64encode(b"ID3fakeaudio").decode("ascii")
 
 
 @workflows.activity(name="fetch-financial-news")
@@ -50,7 +52,7 @@ async def stub_fetch_financial_news() -> list[Story]:
 
 
 @workflows.activity(name="generate-audio-recap")
-async def stub_generate_audio(script: str) -> bytes:
+async def stub_generate_audio(script: str) -> str:
     return FAKE_MP3
 
 
@@ -157,6 +159,7 @@ async def test_send_delivers_email_with_audio_attachment(
 
 async def test_fetch_deduplicates_stories(monkeypatch: pytest.MonkeyPatch) -> None:
     import feedparser
+
     from worker.workflows.finance_newsletter import fetch_financial_news
 
     entries = [

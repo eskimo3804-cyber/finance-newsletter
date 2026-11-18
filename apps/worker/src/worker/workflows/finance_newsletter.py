@@ -100,7 +100,7 @@ def newsletter_prompt(stories: list[Story]) -> str:
 @workflows.activity(
     name="generate-audio-recap", start_to_close_timeout=timedelta(seconds=300)
 )
-async def generate_audio(script: str) -> bytes:
+async def generate_audio(script: str) -> str:
     import edge_tts
 
     communicate = edge_tts.Communicate(script, PODCAST_VOICE)
@@ -111,7 +111,7 @@ async def generate_audio(script: str) -> bytes:
     audio = b"".join(chunks)
     if not audio:
         raise RuntimeError("text-to-speech produced no audio")
-    return audio
+    return base64.b64encode(audio).decode("ascii")
 
 
 @workflows.activity(
@@ -199,9 +199,9 @@ class WeeklyFinanceNewsletterWorkflow:
         audio_generated = False
         audio_base64: str | None = None
         if data.with_audio and len(content.podcast_script) > 0:
-            audio = await generate_audio(content.podcast_script)
-            if len(audio) <= MAX_ATTACHMENT_BYTES:
-                audio_base64 = base64.b64encode(audio).decode("ascii")
+            candidate = await generate_audio(content.podcast_script)
+            if len(candidate) <= (4 * ((MAX_ATTACHMENT_BYTES + 2) // 3)):
+                audio_base64 = candidate
                 audio_generated = True
 
         html = render_html(content)
