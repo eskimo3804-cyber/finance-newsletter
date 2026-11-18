@@ -9,6 +9,8 @@ dependencies = [
     "mistralai-workflows[mistralai]>=3.17.1",
     "pydantic>=2.14.1",
     "structlog>=25.5.0",
+    "feedparser>=6.0.11",
+    "edge-tts>=6.1.19",
 ]
 
 [build-system]
@@ -23,3 +25,14 @@ utils = { workspace = true }
 env = { workspace = true }
 mistralai-workflows = { index = "pypi" }
 
+[dependency-groups]
+dev = [
+    "pytest>=9.2.0",
+    "pytest-asyncio>=1.5.0",
+]
+
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "session"
+testpaths = ["tests"]
