@@ -18,7 +18,7 @@ from mistralai.workflows.plugins.mistralai.connectors import (
     uses_connectors,
 )
 
-gmail = connector("gmail")
+gmail = connector("gmail", auto_auth=False)
 
 RSS_FEEDS: tuple[str, ...] = (
     "https://finance.yahoo.com/news/rssindex",
